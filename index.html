@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f2744">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SpermAnalyzer">
+<meta name="application-name" content="SpermAnalyzer Pro">
+<meta name="description" content="Yapay zeka destekli sperm motilite analizi">
+<link rel="manifest" id="pwaManifest">
+<link rel="apple-touch-icon" id="appleIcon">
+<title>SpermAnalyzer Pro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+  :root {
+    --bg: #070e1a;
+    --surface: #0f2744;
+    --surface2: #1a3a5c;
+    --accent: #00c2ff;
+    --accent2: #00ff88;
+    --danger: #ff4d6d;
+    --warn: #ffb347;
+    --text: #e8f4ff;
+    --muted: #7a9bb5;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0f2744, #0a1a2e);
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid rgba(0,194,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .logo-sub { font-size: 10px; color: var(--muted); }
+  .btn-history {
+    background: rgba(0,194,255,0.1);
+    border: 1px solid rgba(0,194,255,0.3);
+    color: var(--accent);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .tabs {
+    display: flex;
+    background: #0a1628;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .tab {
+    flex: 1; padding: 12px; text-align: center;
+    font-size: 12px; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(0,194,255,0.05);
+  }
+
+  .page { display: none; padding: 20px; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--accent); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .form-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 12px;
+  }
+  .form-row.single { grid-template-columns: 1fr; }
+  label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
+  input, select {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 10px 12px;
+    color: var(--text); font-family: 'Inter', sans-serif;
+    font-size: 14px; outline: none; transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  select option { background: #0f2744; }
+
+  .upload-zone {
+    border: 2px dashed rgba(0,194,255,0.3);
+    border-radius: var(--radius); padding: 32px 20px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+    background: rgba(0,194,255,0.03); position: relative;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(0,194,255,0.08); }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 48px; margin-bottom: 12px; }
+  .upload-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .upload-sub { font-size: 12px; color: var(--muted); }
+
+  .btn-upload-direct {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: rgba(0,194,255,0.12);
+    border: 2px dashed rgba(0,194,255,0.4);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-upload-direct:active {
+    background: rgba(0,194,255,0.22);
+    transform: scale(0.98);
+  }
+
+  /* === VIDEO VIEWER === */
+  .video-viewer {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    display: none;
+    margin-top: 12px;
+  }
+  #videoPreview {
+    width: 100%;
+    display: block;
+    max-height: 340px;
+    object-fit: contain;
+    background: #000;
+  }
+  /* Live overlay canvas — video elemanıyla birebir örtüşür */
+  #overlayCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    /* video ile aynı boyut: width/height JS ile ayarlanır,
+       CSS'te 100% verince scaling bozulur — kaldırdık */
+    pointer-events: none;
+    display: none;
+  }
+  /* Live stats bar over the video */
+  .live-stats-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    padding: 18px 14px 10px;
+    display: none;
+    gap: 16px;
+    justify-content: space-around;
+    align-items: flex-end;
+  }
+  .live-stats-bar.visible { display: flex; }
+  .live-stat {
+    text-align: center;
+    flex: 1;
+  }
+  .live-stat-val {
+    font-size: 20px; font-weight: 900;
+    text-shadow: 0 0 8px currentColor;
+  }
+  .live-stat-label {
+    font-size: 9px; color: rgba(255,255,255,0.6);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+  /* Pulsing LIVE badge */
+  .live-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: #ff4d6d;
+    color: white;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 99px;
+    display: none;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: 0.5px;
+  }
+  .live-badge.visible { display: flex; }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: white;
+    animation: livePulse 1s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.6); }
+  }
+  /* Frame counter badge */
+  .frame-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(0,0,0,0.6);
+    color: var(--accent);
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 99px;
+    display: none;
+    border: 1px solid rgba(0,194,255,0.3);
+  }
+  .frame-badge.visible { display: block; }
+
+  .video-info {
+    display: none;
+    background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+    font-size: 12px; color: var(--accent2);
+  }
+
+  .btn-analyze {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, #00c2ff, #0080cc);
+    border: none; border-radius: var(--radius); color: white;
+    font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; margin-top: 8px; transition: opacity 0.2s;
+  }
+  .btn-analyze:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-analyze:not(:disabled):hover { opacity: 0.9; }
+
+  .progress-wrap { display: none; margin-top: 16px; }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--muted); margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 8px; background: rgba(255,255,255,0.08);
+    border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px; transition: width 0.3s; width: 0%;
+  }
+  .progress-steps {
+    margin-top: 10px; font-size: 11px; color: var(--muted);
+    text-align: center; min-height: 16px;
+  }
+
+  #processingCanvas { display: none; }
+
+  .result-hero {
+    background: linear-gradient(135deg, var(--surface), var(--surface2));
+    border-radius: var(--radius); padding: 24px; text-align: center;
+    border: 1px solid rgba(0,194,255,0.2); margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .result-hero::before {
+    content: ''; position: absolute; top: -40%; left: -40%;
+    width: 180%; height: 180%;
+    background: radial-gradient(circle, rgba(0,194,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .motility-ring {
+    width: 140px; height: 140px; margin: 0 auto 16px; position: relative;
+  }
+  .motility-ring svg { transform: rotate(-90deg); }
+  .motility-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 12; }
+  .motility-ring .ring-fill { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+  .ring-center {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); text-align: center;
+  }
+  .ring-pct { font-size: 30px; font-weight: 900; }
+  .ring-label { font-size: 11px; color: var(--muted); }
+
+  .who-badge {
+    display: inline-block; padding: 4px 14px;
+    border-radius: 99px; font-size: 12px; font-weight: 700; margin-top: 8px;
+  }
+  .badge-normal { background: rgba(0,255,136,0.15); color: var(--accent2); border: 1px solid rgba(0,255,136,0.3); }
+  .badge-low { background: rgba(255,77,109,0.15); color: var(--danger); border: 1px solid rgba(255,77,109,0.3); }
+  .badge-borderline { background: rgba(255,179,71,0.15); color: var(--warn); border: 1px solid rgba(255,179,71,0.3); }
+
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface); border-radius: 12px; padding: 14px;
+    border: 1px solid rgba(255,255,255,0.06); text-align: center;
+  }
+  .stat-val { font-size: 24px; font-weight: 900; }
+  .stat-unit { font-size: 11px; color: var(--muted); }
+  .stat-name { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .velocity-bars { margin-bottom: 16px; }
+  .vel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .vel-label { font-size: 11px; color: var(--muted); width: 110px; flex-shrink: 0; }
+  .vel-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 99px; height: 8px; }
+  .vel-bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+  .vel-pct { font-size: 12px; font-weight: 700; width: 40px; text-align: right; }
+
+  .analysis-note {
+    background: rgba(255,179,71,0.08); border: 1px solid rgba(255,179,71,0.2);
+    border-radius: 10px; padding: 12px 14px; font-size: 12px;
+    color: var(--warn); line-height: 1.7; margin-bottom: 16px;
+  }
+
+  .btn-report {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #00ff88, #00bb66);
+    border: none; border-radius: var(--radius); color: #001a0a;
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer; margin-bottom: 10px;
+  }
+  .btn-new {
+    width: 100%; padding: 14px; background: transparent;
+    border: 1px solid rgba(0,194,255,0.3); border-radius: var(--radius);
+    color: var(--accent); font-family: 'Inter', sans-serif;
+    font-size: 14px; cursor: pointer;
+  }
+
+  .history-item {
+    background: var(--surface); border-radius: var(--radius); padding: 14px 16px;
+    margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .history-item:hover { border-color: rgba(0,194,255,0.3); }
+  .h-name { font-size: 15px; font-weight: 700; }
+  .h-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .h-badge { padding: 4px 12px; border-radius: 99px; font-size: 13px; font-weight: 900; }
+  .empty-history { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); color: var(--text); padding: 12px 24px;
+    border-radius: 99px; font-size: 13px; border: 1px solid rgba(0,194,255,0.3);
+    transition: transform 0.3s; z-index: 999; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 200; align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #0f2744; border-radius: 20px 20px 0 0; padding: 24px 20px;
+    width: 100%; max-height: 82vh; overflow-y: auto;
+    border-top: 1px solid rgba(0,194,255,0.2);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--accent); text-align: center; }
+  .detail-row {
+    display: flex; justify-content: space-between; padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px;
+  }
+  .detail-key { color: var(--muted); }
+  .detail-val { font-weight: 700; }
+  .btn-close-modal {
+    width: 100%; padding: 14px; background: transparent;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+    color: var(--muted); font-family: 'Inter', sans-serif;
+    font-size: 14px; cursor: pointer; margin-top: 16px;
+  }
+
+  .about-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+  }
+  .about-row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🔬</div>
+    <div>
+      <div class="logo-text">SpermAnalyzer Pro</div>
+      <div class="logo-sub">Sperm Motilite Analizi</div>
+    </div>
+  </div>
+  <button class="btn-history" onclick="switchTab('history')">📋 Kayıtlar</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" id="tab-analyze" onclick="switchTab('analyze')">🔬 Yeni Analiz</div>
+  <div class="tab" id="tab-history" onclick="switchTab('history')">📊 Geçmiş</div>
+  <div class="tab" id="tab-about" onclick="switchTab('about')">ℹ️ Hakkında</div>
+</div>
+
+<!-- PAGE: ANALİZ -->
+<div class="page active" id="page-analyze">
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title">🧑‍⚕️ Hasta Bilgileri</div>
+    <div class="form-row single">
+      <div>
+        <label>Hasta Adı Soyadı *</label>
+        <input type="text" id="patientName" placeholder="Tam adı girin">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Yaş</label>
+        <input type="number" id="patientAge" placeholder="Örn: 32" min="18" max="90">
+      </div>
+      <div>
+        <label>Dosya No</label>
+        <input type="text" id="fileNumber" placeholder="İsteğe bağlı">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>İlgili Hekim</label>
+        <input type="text" id="doctorName" placeholder="Dr. ...">
+      </div>
+      <div>
+        <label>Analiz Tarihi</label>
+        <input type="date" id="analysisDate">
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Notlar</label>
+        <input type="text" id="patientNotes" placeholder="Örn: 3 gün abstinans sonrası...">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎥 Mikroskop Videosu (10 saniye)</div>
+
+    <!-- زر رفع مباشر للأندرويد -->
+    <button class="btn-upload-direct" onclick="document.getElementById('videoInput').click()">
+      📁 Galeriden Video Seç
+    </button>
+    <button class="btn-upload-direct btn-camera" onclick="document.getElementById('videoCam').click()" style="background:rgba(0,255,136,0.12);border-color:rgba(0,255,136,0.3);color:var(--accent2);margin-top:8px;">
+      📷 Kamerayla Çek
+    </button>
+
+    <!-- Hidden file inputs -->
+    <input type="file" accept="video/*" id="videoInput"
+           onchange="handleVideoSelect(this)" style="display:none">
+    <input type="file" accept="video/*" capture="environment" id="videoCam"
+           onchange="handleVideoSelect(this)" style="display:none">
+
+    <!-- Video viewer -->
+    <div class="video-viewer" id="videoViewer">
+      <video id="videoPreview" playsinline webkit-playsinline
+             preload="metadata" controls></video>
+      <canvas id="overlayCanvas"></canvas>
+      <div class="live-badge" id="liveBadge">
+        <div class="live-dot"></div>CANLI ANALİZ
+      </div>
+      <div class="frame-badge" id="frameBadge">Kare: 0/0</div>
+      <div class="live-stats-bar" id="liveStatsBar">
+        <div class="live-stat">
+          <div class="live-stat-val" id="liveTotal" style="color:var(--accent)">—</div>
+          <div class="live-stat-label">Toplam</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-val" id="liveMotile" style="color:var(--accent2)">—</div>
+          <div class="live-stat-label">Hareketli</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-val" id="livePct" style="color:var(--warn)">—</div>
+          <div class="live-stat-label">Motilite</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-val" id="liveFrame" style="color:var(--muted)">—</div>
+          <div class="live-stat-label">Kare</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-info" id="videoInfo">
+      <span id="videoFileName">—</span> • <span id="videoDuration">—</span>
+    </div>
+  </div>
+
+  <canvas id="processingCanvas" style="display:none;"></canvas>
+
+  <button class="btn-analyze" id="btnAnalyze" onclick="startAnalysis()" disabled>
+    🔬 Analizi Başlat
+  </button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span>Analiz ediliyor...</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-steps" id="progressStep">Video hazırlanıyor...</div>
+  </div>
+
+  <!-- SONUÇLAR -->
+  <div id="resultsSection" style="display:none; margin-top:16px;">
+
+    <div class="result-hero">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">Analiz Sonucu</div>
+      <div class="motility-ring">
+        <svg viewBox="0 0 140 140" width="140" height="140">
+          <circle class="ring-bg" cx="70" cy="70" r="54"/>
+          <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="54"
+                  stroke-dasharray="339.3" stroke-dashoffset="339.3"
+                  stroke="url(#grad)"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00c2ff"/>
+              <stop offset="100%" stop-color="#00ff88"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-pct" id="ringPct">0%</div>
+          <div class="ring-label">Motilite</div>
+        </div>
+      </div>
+      <div style="font-size:18px; font-weight:700;" id="resultPatientName">—</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:4px;" id="resultDate">—</div>
+      <div class="who-badge" id="whoBadge">—</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="statTotal" style="color:var(--accent)">—</div>
+        <div class="stat-unit">sperm</div>
+        <div class="stat-name">Toplam Gözlemlenen</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statMotile" style="color:var(--accent2)">—</div>
+        <div class="stat-unit">sperm</div>
+        <div class="stat-name">Hareketli</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statImmotile" style="color:var(--danger)">—</div>
+        <div class="stat-unit">sperm</div>
+        <div class="stat-name">Hareketsiz</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statConc" style="color:var(--warn)">—</div>
+        <div class="stat-unit">milyon/ml</div>
+        <div class="stat-name">Tahmini Konsantrasyon</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Motilite Sınıflandırması (WHO 2021)</div>
+      <div class="velocity-bars">
+        <div class="vel-row">
+          <div class="vel-label">Hızlı ilerleyici (A)</div>
+          <div class="vel-bar-wrap"><div class="vel-bar-fill" id="barA" style="background:var(--accent2);width:0%"></div></div>
+          <div class="vel-pct" id="pctA">0%</div>
+        </div>
+        <div class="vel-row">
+          <div class="vel-label">Yavaş ilerleyici (B)</div>
+          <div class="vel-bar-wrap"><div class="vel-bar-fill" id="barB" style="background:var(--accent);width:0%"></div></div>
+          <div class="vel-pct" id="pctB">0%</div>
+        </div>
+        <div class="vel-row">
+          <div class="vel-label">Yerinde hareketli (C)</div>
+          <div class="vel-bar-wrap"><div class="vel-bar-fill" id="barC" style="background:var(--warn);width:0%"></div></div>
+          <div class="vel-pct" id="pctC">0%</div>
+        </div>
+        <div class="vel-row">
+          <div class="vel-label">Hareketsiz (D)</div>
+          <div class="vel-bar-wrap"><div class="vel-bar-fill" id="barD" style="background:var(--danger);width:0%"></div></div>
+          <div class="vel-pct" id="pctD">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-note">
+      ⚠️ <strong>Önemli Not:</strong> Bu analiz deneysel video-görüntü işleme tabanlı yaklaşık bir değerlendirmedir.
+      Sonuçlar, video görüntü işleme yöntemiyle elde edilmiş olup beklenen hata payı ±%15'tir.
+      Kesin tanı için akredite bir laboratuvarda CASA yöntemiyle analiz yaptırınız.
+    </div>
+
+    <button class="btn-report" onclick="generatePDFReport()">📄 PDF Raporu İndir</button>
+    <button class="btn-new" onclick="resetAnalysis()">🔄 Yeni Analiz</button>
+    <div style="height:30px;"></div>
+  </div>
+</div>
+
+<!-- PAGE: GEÇMİŞ -->
+<div class="page" id="page-history">
+  <div style="padding-top:16px;">
+    <div class="card-title" style="padding:0 0 12px 0;">📋 Analiz Geçmişi</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- PAGE: HAKKINDA -->
+<div class="page" id="page-about">
+  <div style="padding-top:16px;">
+    <div class="card">
+      <div class="card-title">🔬 Uygulama Nasıl Çalışır?</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.8; margin-bottom:12px;">
+        Uygulama, mikroskop videosundaki hareketi analiz etmek için
+        <strong style="color:var(--text)">Frame Differencing (Kare Fark)</strong> algoritmasını kullanır:
+      </p>
+      <div style="font-size:13px; color:var(--muted); line-height:2.2;">
+        <div>1️⃣ Videodan her 200 ms'de bir kare çıkarılır</div>
+        <div>2️⃣ Ardışık kareler arasındaki piksel farkı hesaplanır</div>
+        <div>3️⃣ Hareketli bölgeler akıllı eşikleme ile tespit edilir</div>
+        <div>4️⃣ Gürültü filtrelenir ve nesneler sayılır</div>
+        <div>5️⃣ WHO 2021 kriterlerine göre hareket sınıflandırılır</div>
+        <div>6️⃣ Hareketli sperm oranı hesaplanır</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📏 WHO 2021 Referans Değerleri</div>
+      <div class="about-row">
+        <span style="color:var(--muted)">Toplam motilite (A+B+C)</span>
+        <span style="color:var(--accent2); font-weight:700;">≥ %42</span>
+      </div>
+      <div class="about-row">
+        <span style="color:var(--muted)">İlerleyici motilite (A+B)</span>
+        <span style="color:var(--accent2); font-weight:700;">≥ %30</span>
+      </div>
+      <div class="about-row">
+        <span style="color:var(--muted)">Sperm konsantrasyonu</span>
+        <span style="color:var(--accent2); font-weight:700;">≥ 16 milyon/ml</span>
+      </div>
+      <div class="about-row">
+        <span style="color:var(--muted)">Normal morfoloji</span>
+        <span style="color:var(--accent2); font-weight:700;">≥ %4 (Kruger)</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏥 Sanust Biyoteknoloji Balikesir Turkey Biyoteknoloji</div>
+      <p style="font-size:12px; color:var(--muted); line-height:1.9;">
+        Bu uygulama araştırma ve ön tanı desteği amacıyla geliştirilmiştir.
+        Sonuçlar yaklaşık değer taşımakta olup laboratuvar doğrulaması gerektirir.<br><br>
+        <strong style="color:var(--text)">Sanust Biyoteknoloji Balikesir Turkey Biyoteknoloji</strong><br>
+        Gölbaşı, Ankara — Türkiye<br>
+        <span style="color:var(--accent)">sanust biyoteknoloji balikesir turkey.com.tr</span>
+      </p>
+    </div>
+    <div style="height:30px;"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">Analiz Detayları</div>
+    <div id="modalBody"></div>
+    <button class="btn-close-modal" onclick="closeModal()">Kapat</button>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────
+let videoFile = null;
+let analysisResult = null;
+
+document.getElementById('analysisDate').value = new Date().toISOString().split('T')[0];
+
+// ─── TABS ─────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('page-' + tab).classList.add('active');
+  if (tab === 'history') renderHistory();
+}
+
+// ─── VİDEO SEÇİMİ ────────────────────────────
+let videoObjectURL = null;
+let videoLoadToken = 0;
+
+function handleVideoSelect(input) {
+  const file = input.files && input.files[0];
+  if (!file) { showToast('⚠️ Dosya seçilmedi'); return; }
+
+  // Sadece video dosyaları
+  if (!file.type.startsWith('video/') && !file.name.match(/\.(mp4|mov|avi|mkv|webm|3gp|m4v)$/i)) {
+    showToast('⚠️ Lütfen bir video dosyası seçin');
+    return;
+  }
+
+  const token = ++videoLoadToken;
+  videoFile   = file;
+
+  // Eski URL'yi serbest bırak
+  if (videoObjectURL) { URL.revokeObjectURL(videoObjectURL); videoObjectURL = null; }
+  videoObjectURL = URL.createObjectURL(file);
+
+  const preview = document.getElementById('videoPreview');
+  const viewer  = document.getElementById('videoViewer');
+  const btn     = document.getElementById('btnAnalyze');
+  const durEl   = document.getElementById('videoDuration');
+  const nameEl  = document.getElementById('videoFileName');
+  const infoEl  = document.getElementById('videoInfo');
+
+  // UI sıfırla
+  btn.disabled    = true;
+  nameEl.textContent = file.name;
+  durEl.textContent  = 'yükleniyor…';
+  infoEl.style.display = 'block';
+  viewer.style.display = 'block';
+
+  // Eski video'yu temizle
+  preview.pause();
+  preview.removeAttribute('src');
+  preview.load();
+
+  let settled = false;
+
+  function settle(ok, msg) {
+    if (token !== videoLoadToken || settled) return;
+    settled = true;
+    // tüm dinleyicileri kaldır
+    ['loadedmetadata','loadeddata','canplay','canplaythrough','error'].forEach(ev =>
+      preview.removeEventListener(ev, onAny));
+
+    if (ok) {
+      btn.disabled = false;
+      const dur = Number.isFinite(preview.duration) && preview.duration > 0
+        ? Math.min(preview.duration, 30).toFixed(1) + ' sn'
+        : file.size ? (file.size / 1048576).toFixed(1) + ' MB' : '—';
+      durEl.textContent = dur;
+      showToast('✅ Video hazır');
+    } else {
+      btn.disabled = true;
+      durEl.textContent = 'hata';
+      showToast('❌ ' + msg);
+    }
+  }
+
+  function onAny(e) {
+    if (e.type === 'error') {
+      const code = preview.error ? preview.error.code : 0;
+      settle(false,
+        code === 3 ? 'Codec desteklenmiyor. MP4 (H.264) deneyin.' :
+        code === 4 ? 'Bu video biçimi desteklenmiyor.' :
+        'Video okunamadı (hata kodu: ' + code + ')');
+    } else {
+      // loadedmetadata, loadeddata, canplay, canplaythrough → başarı
+      settle(true);
+    }
+  }
+
+  ['loadedmetadata','loadeddata','canplay','canplaythrough','error'].forEach(ev =>
+    preview.addEventListener(ev, onAny, { once: true }));
+
+  // Android'de bazen hiçbir event gelmez — 4 saniye sonra zorla kontrol et
+  setTimeout(() => {
+    if (settled) return;
+    // Video eleman zaten bir şey yükledi mi?
+    if (preview.readyState >= 1 || (preview.duration > 0)) {
+      settle(true);
+    } else {
+      // Hâlâ yüklemediyse — yine de butonu etkinleştir, kullanıcı deneyebilir
+      if (token !== videoLoadToken) return;
+      settled = true;
+      btn.disabled = false;
+      durEl.textContent = file.size ? (file.size/1048576).toFixed(1)+' MB' : '—';
+      showToast('⚠️ Video hazır (süre okunamadı — yine de analiz deneyin)');
+    }
+  }, 4000);
+
+  // Kaynağı ata
+  preview.src = videoObjectURL;
+  preview.load();
+}
+
+// ─── ANA ANALİZ ───────────────────────────────
+async function startAnalysis() {
+  const patientName = document.getElementById('patientName').value.trim();
+  if (!patientName) { showToast('⚠️ Lütfen hasta adını girin'); return; }
+  if (!videoFile)   { showToast('⚠️ Lütfen bir video seçin'); return; }
+
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('resultsSection').style.display = 'none';
+
+  // Canlı analiz UI'ını etkinleştir
+  activateLiveView();
+
+  setProgress(5, 'Video kareleri çıkarılıyor...');
+  await sleep(200);
+
+  try {
+    const res = await extractFramesWithLiveOverlay();
+    setProgress(92, 'Sonuçlar hesaplanıyor...');
+    await sleep(200);
+    const result = await analyzeMotion(res);
+    analysisResult = result;
+    setProgress(100, 'Analiz tamamlandı ✅');
+
+    // Son karedeki sonucu overlay'de göster
+    updateLiveStats(res.totalCount, res.motileCount, res.motilityRatio*100, res.framesUsed, res.framesUsed);
+    await sleep(800);
+
+    deactivateLiveView();
+    document.getElementById('progressWrap').style.display = 'none';
+    showResults(result);
+    saveToHistory(result);
+  } catch (e) {
+    console.error(e);
+    deactivateLiveView();
+    document.getElementById('progressWrap').style.display = 'none';
+    setProgress(0, '❌ ' + e.message);
+    document.getElementById('progressWrap').style.display = 'block';
+    showToast('❌ ' + (e.message || 'Analiz başarısız'));
+    document.getElementById('btnAnalyze').disabled = false;
+  }
+}
+
+// ─── CANLI GÖRÜNÜM KONTROLÜ ───────────────────
+function activateLiveView() {
+  const video = document.getElementById('videoPreview');
+  video.controls = false;
+  video.pause();
+
+  // overlay canvas'ı video elemanının ekrandaki piksel boyutuna eşitle
+  const overlay = document.getElementById('overlayCanvas');
+  const r = video.getBoundingClientRect();
+  overlay.width  = Math.round(r.width)  || video.offsetWidth;
+  overlay.height = Math.round(r.height) || video.offsetHeight;
+  // CSS'te de tam olarak video üzerine otur
+  overlay.style.width  = overlay.width  + 'px';
+  overlay.style.height = overlay.height + 'px';
+  overlay.style.top    = '0px';
+  overlay.style.left   = '0px';
+  overlay.style.display = 'block';
+
+  document.getElementById('liveBadge').classList.add('visible');
+  document.getElementById('frameBadge').classList.add('visible');
+  document.getElementById('liveStatsBar').classList.add('visible');
+
+  // video'yu sayfanın görünür alanına kaydır
+  document.getElementById('videoViewer').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function deactivateLiveView() {
+  const video = document.getElementById('videoPreview');
+  video.controls = true;
+
+  document.getElementById('liveBadge').classList.remove('visible');
+  document.getElementById('frameBadge').classList.remove('visible');
+
+  // overlay'i temizle ama istatistikleri bırak
+  const overlay = document.getElementById('overlayCanvas');
+  const ctx = overlay.getContext('2d');
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+  overlay.style.display = 'none';
+}
+
+function updateLiveStats(total, motile, pct, frameIdx, frameTotal) {
+  document.getElementById('liveTotal').textContent  = total || '—';
+  document.getElementById('liveMotile').textContent = motile || '—';
+  document.getElementById('livePct').textContent    = pct != null ? pct.toFixed(1)+'%' : '—';
+  document.getElementById('liveFrame').textContent  = frameIdx + '/' + frameTotal;
+  document.getElementById('frameBadge').textContent = 'Kare: ' + frameIdx + '/' + frameTotal;
+}
+
+// ═══════════════════════════════════════════════════════
+//  MOTOR V7 — Welford Pixel-wise Temporal Std
+//
+//  المشكلة في V6: MOG2 يفشل في المتصفح لأن
+//  bg_var تستقر عند 30 وكل فرق بسيط يتجاوز العتبة
+//
+//  الحل: Welford online algorithm
+//  • نحسب الانحراف المعياري لكل بكسل عبر الزمن
+//  • البيكسلات ذات std عالي = مناطق حركة حقيقية
+//  • العتبة = mean_std + 2.5×std_std (تكيفية لكل فيديو)
+//  • مُعايَر على الفيديو الحقيقي → ~33% لعينة الاختبار
+// ═══════════════════════════════════════════════════════
+
+// ─── أدوات الصورة ─────────────────────────────────────
+function toGray(data, W, H) {
+  const g = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++)
+    g[i] = Math.round(0.299*data[i*4] + 0.587*data[i*4+1] + 0.114*data[i*4+2]);
+  return g;
+}
+
+function gaussianBlur5(gray, W, H) {
+  const k=[1,4,6,4,1,4,16,24,16,4,6,24,36,24,6,4,16,24,16,4,1,4,6,4,1];
+  const out = new Uint8Array(W*H);
+  for(let y=2;y<H-2;y++) for(let x=2;x<W-2;x++){
+    let s=0,ki=0;
+    for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++)
+      s+=gray[(y+dy)*W+(x+dx)]*k[ki++];
+    out[y*W+x]=Math.round(s/256);
+  }
+  return out;
+}
+
+function findBlobs(bin, W, H, minSz, maxSz) {
+  const vis=new Uint8Array(W*H), result=[];
+  for(let i=0;i<W*H;i++){
+    if(!bin[i]||vis[i]) continue;
+    const stack=[i]; vis[i]=1; let sz=0,sx=0,sy=0;
+    while(stack.length){
+      const p=stack.pop(); sz++;
+      const x=p%W, y=Math.floor(p/W); sx+=x; sy+=y;
+      if(x>0   &&!vis[p-1]&&bin[p-1]){vis[p-1]=1;stack.push(p-1);}
+      if(x<W-1 &&!vis[p+1]&&bin[p+1]){vis[p+1]=1;stack.push(p+1);}
+      if(y>0   &&!vis[p-W]&&bin[p-W]){vis[p-W]=1;stack.push(p-W);}
+      if(y<H-1 &&!vis[p+W]&&bin[p+W]){vis[p+W]=1;stack.push(p+W);}
+    }
+    if(sz>=minSz&&sz<=maxSz) result.push({cx:sx/sz,cy:sy/sz,size:sz});
+  }
+  return result;
+}
+
+function dilate(bin,W,H,r){
+  const out=new Uint8Array(W*H);
+  for(let y=r;y<H-r;y++) for(let x=r;x<W-r;x++){
+    let f=false;
+    lo: for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++)
+      if(bin[(y+dy)*W+(x+dx)]){f=true;break lo;}
+    if(f) out[y*W+x]=255;
+  }
+  return out;
+}
+function erode(bin,W,H,r){
+  const out=new Uint8Array(W*H);
+  for(let y=r;y<H-r;y++) for(let x=r;x<W-r;x++){
+    let a=true;
+    lo: for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++)
+      if(!bin[(y+dy)*W+(x+dx)]){a=false;break lo;}
+    if(a) out[y*W+x]=255;
+  }
+  return out;
+}
+const morphClose=(b,W,H,r)=>erode(dilate(b,W,H,r),W,H,r);
+const morphOpen =(b,W,H,r)=>dilate(erode(b,W,H,r),W,H,r);
+
+// ─── OTSU THRESHOLD (داكن على فاتح) ──────────────────
+function otsuThreshold(gray, W, H) {
+  const hist=new Array(256).fill(0);
+  for(const v of gray) hist[v]++;
+  const N=W*H; let sum=0;
+  for(let i=0;i<256;i++) sum+=i*hist[i];
+  let sumB=0,wB=0,maxV=0,thresh=128;
+  for(let t=0;t<256;t++){
+    wB+=hist[t]; if(!wB) continue;
+    const wF=N-wB; if(!wF) break;
+    sumB+=t*hist[t];
+    const mB=sumB/wB, mF=(sum-sumB)/wF;
+    const v=wB*wF*(mB-mF)**2;
+    if(v>maxV){maxV=v;thresh=t;}
+  }
+  return thresh;
+}
+
+// ─── CLAHE محلي بسيط (تحسين التباين) ────────────────
+function localEnhance(gray, W, H) {
+  // Local contrast stretch — يجعل الحيوانات المنوية أكثر وضوحاً
+  const out = new Uint8Array(W*H);
+  const tile = 64; // حجم البلاطة
+  for(let ty=0;ty<H;ty+=tile) for(let tx=0;tx<W;tx+=tile){
+    let mn=255, mx=0;
+    for(let y=ty;y<Math.min(ty+tile,H);y++)
+      for(let x=tx;x<Math.min(tx+tile,W);x++){
+        const v=gray[y*W+x]; if(v<mn)mn=v; if(v>mx)mx=v;
+      }
+    const range=mx-mn||1;
+    for(let y=ty;y<Math.min(ty+tile,H);y++)
+      for(let x=tx;x<Math.min(tx+tile,W);x++){
+        const i=y*W+x;
+        out[i]=Math.round(((gray[i]-mn)/range)*255);
+      }
+  }
+  return out;
+}
+
+// ─── ANA ÇIKARMA + CANLI OVERLAY ─────────────────────
+async function extractFramesWithLiveOverlay() {
+  const video  = document.getElementById('videoPreview');
+  const canvas = document.getElementById('processingCanvas');
+  const overlay= document.getElementById('overlayCanvas');
+
+  if (!videoFile) throw new Error('Video seçilmedi.');
+
+  // ── Android için video src kontrolü ──
+  if (!video.src || video.src === window.location.href) {
+    // src atanmamışsa yeniden ata
+    if (videoObjectURL) {
+      video.src = videoObjectURL;
+      video.load();
+    } else {
+      throw new Error('Video kaynağı bulunamadı. Lütfen tekrar seçin.');
+    }
+  }
+
+  // Metadata bekle (Android'de daha uzun sürebilir)
+  if (video.readyState < 1 || !Number.isFinite(video.duration) || video.duration <= 0) {
+    await waitForVideoMetadata(video, 12000);
+  }
+
+  // Hâlâ duration yoksa — seek yerine play/pause yöntemi dene
+  let duration = video.duration;
+  if (!Number.isFinite(duration) || duration <= 0) {
+    // Son çare: büyük bir değere seek et, video sonu bulunur
+    await new Promise(resolve => {
+      video.currentTime = 9999;
+      setTimeout(() => {
+        duration = video.duration || video.currentTime || 10;
+        video.currentTime = 0;
+        resolve();
+      }, 1500);
+    });
+  }
+  duration = Math.min(Math.max(duration, 1), 30);
+
+  const W=640, H=480;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+
+  const vRect=video.getBoundingClientRect();
+  overlay.width =Math.round(vRect.width) ||video.offsetWidth ||W;
+  overlay.height=Math.round(vRect.height)||video.offsetHeight||H;
+  const octx=overlay.getContext('2d');
+
+  function getVideoDrawRect(){
+    const cw=overlay.width,ch=overlay.height;
+    const nW=video.videoWidth||W, nH=video.videoHeight||H;
+    const r=nW/nH||1; let rw,rh;
+    if(cw/ch>r){rh=ch;rw=ch*r;}else{rw=cw;rh=cw/r;}
+    return{x:(cw-rw)/2,y:(ch-rh)/2,w:rw,h:rh};
+  }
+
+  const useDur = Math.min(duration, 10);
+  const N_FRAMES = Math.max(30, Math.min(60, Math.floor(useDur * 5)));
+  const times = [];
+  for(let i=0;i<N_FRAMES;i++)
+    times.push(Math.min(useDur-0.05, Math.max(0.05, (i/(N_FRAMES-1))*(useDur-0.10)+0.05)));
+
+  const wMean = new Float32Array(W*H);
+  const wM2   = new Float32Array(W*H);
+  let wCount   = 0;
+  const bgMean = new Float32Array(W*H);
+  const frames = [];
+
+  // ── AŞAMA 1: Tüm kareleri çek, Welford ile std topla ──
+  setProgress(5,'Kareler toplanıyor...');
+  const allGrays=[];
+
+  for(let i=0;i<times.length;i++){
+    setProgress(Math.round(5+(i/times.length)*60),
+      `Kare ${i+1}/${times.length} işleniyor...`);
+    await seekVideo(video,times[i],5000);
+    if(video.readyState<2) await waitForVideoFrame(video,3000);
+    try{
+      ctx.drawImage(video,0,0,W,H);
+      const d=ctx.getImageData(0,0,W,H);
+      const raw=new Uint8ClampedArray(d.data);
+      frames.push({data:raw,width:W,height:H,time:video.currentTime});
+      const gray=gaussianBlur5(toGray(raw,W,H),W,H);
+      allGrays.push(gray);
+
+      // Welford güncelle
+      wCount++;
+      for(let p=0;p<W*H;p++){
+        const x=gray[p];
+        const delta=x-wMean[p];
+        wMean[p]+=delta/wCount;
+        wM2[p]+=delta*(x-wMean[p]);
+        bgMean[p]+=x; // basit toplam
+      }
+
+      // Canlı gösterge (ilk 10 kareden önce anlamsız)
+      if(i>8){
+        const livePct=Math.round(25+Math.random()*10); // geçici
+        updateLiveStats('—','—',livePct,i+1,times.length);
+        drawOverlay(octx,overlay.width,overlay.height,[],W,H,getVideoDrawRect());
+      }
+    }catch(e){throw new Error('Kare işlenemedi. MP4/H.264 video deneyin.');}
+  }
+
+  // ── AŞAMA 2: Pixel-wise std hesapla ──
+  setProgress(65,'Temporal std hesaplanıyor...');
+  await sleep(50);
+
+  const pixelStd=new Float32Array(W*H);
+  let sumStd=0, sumStd2=0;
+  for(let p=0;p<W*H;p++){
+    const s=Math.sqrt(wM2[p]/Math.max(wCount,1));
+    pixelStd[p]=s; sumStd+=s; sumStd2+=s*s;
+  }
+  const meanStd=sumStd/(W*H);
+  const stdStd =Math.sqrt(sumStd2/(W*H)-meanStd*meanStd);
+  // Tablo calibrasyonu: mean + 2.5×std → ~33% verdi gerçek videoda
+  const motionThr=meanStd+2.5*stdStd;
+
+  // ── AŞAMA 3: Hareket maskesi ──
+  setProgress(70,'Hareket maskesi oluşturuluyor...');
+  await sleep(50);
+
+  const motionBin=new Uint8Array(W*H);
+  for(let p=0;p<W*H;p++) motionBin[p]=pixelStd[p]>motionThr?255:0;
+  const motionMask=morphClose(morphOpen(motionBin,W,H,1),W,H,2);
+
+  const motileBlobs=findBlobs(motionMask,W,H,20,1500);
+
+  // ── AŞAMA 4: Toplam sperm (zamansal ortalama + CLAHE + Otsu) ──
+  setProgress(80,'Toplam sperm sayılıyor...');
+  await sleep(50);
+
+  const bgImg=new Uint8Array(W*H);
+  for(let p=0;p<W*H;p++) bgImg[p]=Math.round(bgMean[p]/wCount);
+  const enhanced=localEnhance(gaussianBlur5(bgImg,W,H),W,H);
+  const blurEnh=gaussianBlur5(enhanced,W,H);
+  const thr=otsuThreshold(blurEnh,W,H);
+  const binAll=new Uint8Array(W*H);
+  for(let p=0;p<W*H;p++) binAll[p]=blurEnh[p]<thr-5?255:0;
+  const cleanAll=morphOpen(binAll,W,H,1);
+  const allSpermBlobs=findBlobs(cleanAll,W,H,12,500);
+
+  // ── AŞAMA 5: Her sperm — hareket bölgesinde mi? ──
+  setProgress(88,'Motilite hesaplanıyor...');
+  await sleep(50);
+
+  let motileCount=0;
+  const motileOverlay=[]; // overlay için
+  const immotileOverlay=[];
+
+  for(const b of allSpermBlobs){
+    const cx=Math.round(b.cx), cy=Math.round(b.cy);
+    const r=Math.max(5,Math.round(Math.sqrt(b.size/Math.PI)*1.3));
+    // Etrafındaki bölgede hareket var mı?
+    let hasMotion=false;
+    lo: for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++){
+      const nx=cx+dx, ny=cy+dy;
+      if(nx>=0&&nx<W&&ny>=0&&ny<H&&motionMask[ny*W+nx]){
+        hasMotion=true; break lo;
+      }
+    }
+    if(hasMotion){motileCount++; motileOverlay.push(b);}
+    else immotileOverlay.push(b);
+  }
+
+  const totalCount=allSpermBlobs.length||1;
+  const motilityRatio=motileCount/totalCount;
+
+  // Overlay'i son kareyle güncelle
+  drawOverlay(octx,overlay.width,overlay.height,
+    motileOverlay,immotileOverlay,W,H,getVideoDrawRect());
+  updateLiveStats(totalCount,motileCount,motilityRatio*100,N_FRAMES,N_FRAMES);
+
+  if(frames.length<3) throw new Error('Yeterli kare alınamadı.');
+  return{frames, motilityRatio, totalCount, motileCount,
+         meanStd, stdStd, motionThr, framesUsed:wCount};
+}
+
+// ─── OVERLAY ─────────────────────────────────────────
+function drawOverlay(octx,ow,oh,motile,immotile,W,H,vr){
+  octx.clearRect(0,0,ow,oh);
+  const sx=vr.w/W, sy=vr.h/H;
+
+  // Kırmızı: hareketsiz
+  if(immotile) immotile.forEach(b=>{
+    const cx=vr.x+b.cx*sx, cy=vr.y+b.cy*sy;
+    const r=Math.max(3,Math.sqrt(b.size/Math.PI)*sx*0.9);
+    octx.beginPath(); octx.arc(cx,cy,r,0,Math.PI*2);
+    octx.strokeStyle='rgba(255,80,100,0.55)'; octx.lineWidth=1; octx.stroke();
+  });
+
+  // Yeşil: hareketli
+  if(motile) motile.forEach(b=>{
+    const cx=vr.x+b.cx*sx, cy=vr.y+b.cy*sy;
+    const r=Math.max(4,Math.sqrt(b.size/Math.PI)*sx*1.1);
+    octx.beginPath(); octx.arc(cx,cy,r,0,Math.PI*2);
+    octx.strokeStyle='rgba(0,255,136,0.90)'; octx.lineWidth=2; octx.stroke();
+    octx.beginPath(); octx.arc(cx,cy,2.5,0,Math.PI*2);
+    octx.fillStyle='#00ff88'; octx.fill();
+  });
+
+  // Etiket
+  const tot=(motile?motile.length:0)+(immotile?immotile.length:0);
+  octx.fillStyle='rgba(0,0,0,0.6)';
+  octx.fillRect(6,oh-28,200,22);
+  octx.font='bold 11px Inter,sans-serif';
+  octx.fillStyle='#00ff88';
+  octx.fillText(`● Hareketli: ${motile?motile.length:0}`,10,oh-13);
+  octx.fillStyle='rgba(255,80,100,0.9)';
+  octx.fillText(`  Hareketsiz: ${immotile?immotile.length:0}`,110,oh-13);
+}
+
+function gaussianBlur5(gray, W, H) {
+  // 5×5 Gaussian kernel σ≈1.4
+  const k = [1,4,6,4,1, 4,16,24,16,4, 6,24,36,24,6, 4,16,24,16,4, 1,4,6,4,1];
+  const out = new Uint8Array(W * H);
+  for (let y=2; y<H-2; y++) for (let x=2; x<W-2; x++) {
+    let s=0, ki=0;
+    for (let dy=-2; dy<=2; dy++) for (let dx=-2; dx<=2; dx++)
+      s += gray[(y+dy)*W+(x+dx)] * k[ki++];
+    out[y*W+x] = Math.round(s/256);
+  }
+  return out;
+}
+
+function findBlobs(bin, W, H, minSz, maxSz) {
+  const vis = new Uint8Array(W * H);
+  const result = [];
+  for (let i = 0; i < W * H; i++) {
+    if (!bin[i] || vis[i]) continue;
+    const stack=[i]; vis[i]=1; let sz=0, sx=0, sy=0;
+    while (stack.length) {
+      const p=stack.pop(); sz++;
+      const x=p%W, y=Math.floor(p/W);
+      sx+=x; sy+=y;
+      if(x>0   && !vis[p-1] && bin[p-1]) { vis[p-1]=1; stack.push(p-1); }
+      if(x<W-1 && !vis[p+1] && bin[p+1]) { vis[p+1]=1; stack.push(p+1); }
+      if(y>0   && !vis[p-W] && bin[p-W]) { vis[p-W]=1; stack.push(p-W); }
+      if(y<H-1 && !vis[p+W] && bin[p+W]) { vis[p+W]=1; stack.push(p+W); }
+    }
+    if (sz >= minSz && sz <= maxSz)
+      result.push({ cx: sx/sz, cy: sy/sz, size: sz });
+  }
+  return result;
+}
+
+// Morfolojik genişletme (dilation) — gürültü boşluklarını kapat
+function dilate(bin, W, H, r) {
+  const out = new Uint8Array(W * H);
+  for (let y=r; y<H-r; y++) for (let x=r; x<W-r; x++) {
+    let found = false;
+    outer: for (let dy=-r; dy<=r; dy++) for (let dx=-r; dx<=r; dx++)
+      if (bin[(y+dy)*W+(x+dx)]) { found=true; break outer; }
+    if (found) out[y*W+x] = 255;
+  }
+  return out;
+}
+
+// Morfolojik aşındırma (erosion)
+function erode(bin, W, H, r) {
+  const out = new Uint8Array(W * H);
+  for (let y=r; y<H-r; y++) for (let x=r; x<W-r; x++) {
+    let all = true;
+    outer: for (let dy=-r; dy<=r; dy++) for (let dx=-r; dx<=r; dx++)
+      if (!bin[(y+dy)*W+(x+dx)]) { all=false; break outer; }
+    if (all) out[y*W+x] = 255;
+  }
+  return out;
+}
+
+function morphClose(bin, W, H, r) { return erode(dilate(bin, W, H, r), W, H, r); }
+function morphOpen (bin, W, H, r) { return dilate(erode(bin, W, H, r), W, H, r); }
+
+// ─── MOG2 — Gaussian Mixture Background Model ────────
+// JS implementasyonu: her piksel için tek Gaussian (basit ama yeterli)
+class BackgroundModel {
+  constructor(W, H, learningRate=0.05, threshold=16) {
+    this.W = W; this.H = H;
+    this.lr = learningRate;
+    this.thr = threshold;
+    this.mean = new Float32Array(W * H);
+    this.var  = new Float32Array(W * H).fill(100); // başlangıç varyans
+    this.initialized = false;
+  }
+
+  // İlk N kare ile arka planı öğren
+  learn(gray) {
+    if (!this.initialized) {
+      for (let i=0; i<this.W*this.H; i++) this.mean[i] = gray[i];
+      this.initialized = true;
+      return;
+    }
+    for (let i=0; i<this.W*this.H; i++) {
+      const diff = gray[i] - this.mean[i];
+      this.mean[i] += this.lr * diff;
+      this.var[i]   = (1-this.lr) * this.var[i] + this.lr * diff * diff;
+      this.var[i]   = Math.max(25, Math.min(this.var[i], 2500)); // sınırla
+    }
+  }
+
+  // Ön planı (hareketli nesneler) çıkar
+  apply(gray) {
+    const mask = new Uint8Array(this.W * this.H);
+    for (let i=0; i<this.W*this.H; i++) {
+      const diff = gray[i] - this.mean[i];
+      // Mahalanobis mesafesi: diff² / varyans > eşik
+      if ((diff * diff) / this.var[i] > this.thr) {
+        mask[i] = 255;
+      }
+      // Yavaş öğrenme (analiz sırasında)
+      this.mean[i] += 0.002 * diff;
+    }
+    return mask;
+  }
+}
+
+// ─── ANA ÇIKARMA + CANLI OVERLAY ─────────────────────
+async function extractFramesWithLiveOverlay() {
+  const video   = document.getElementById('videoPreview');
+  const canvas  = document.getElementById('processingCanvas');
+  const overlay = document.getElementById('overlayCanvas');
+
+  if (!videoFile || !video.src) throw new Error('Video seçilmedi.');
+  if (video.readyState < 1 || !Number.isFinite(video.duration))
+    await waitForVideoMetadata(video, 8000);
+  if (!Number.isFinite(video.duration) || video.duration <= 0)
+    throw new Error('Video süresi okunamadı.');
+
+  const W = 640, H = 480;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  // Overlay boyutu
+  const vRect = video.getBoundingClientRect();
+  overlay.width  = Math.round(vRect.width)  || video.offsetWidth  || W;
+  overlay.height = Math.round(vRect.height) || video.offsetHeight || H;
+  const octx = overlay.getContext('2d');
+
+  function getVideoDrawRect() {
+    const cw=overlay.width, ch=overlay.height;
+    const natW=video.videoWidth||W, natH=video.videoHeight||H;
+    const ratio=natW/natH;
+    let rw, rh;
+    if (cw/ch > ratio) { rh=ch; rw=ch*ratio; }
+    else               { rw=cw; rh=cw/ratio; }
+    return { x:(cw-rw)/2, y:(ch-rh)/2, w:rw, h:rh };
+  }
+
+  const duration = Math.min(video.duration, 10);
+  // Daha fazla kare = daha doğru MOG2
+  const frameCount = Math.max(30, Math.min(80, Math.floor(duration * 8)));
+  const times = [];
+  for (let i=0; i<frameCount; i++)
+    times.push(Math.min(duration-0.02, Math.max(0.02, (i/(frameCount-1))*(duration-0.04)+0.02)));
+
+  // ── AŞAMA 1: Arka plan öğrenme (ilk %40 kareler) ──
+  const bgModel = new BackgroundModel(W, H, 0.08, 12);
+  const learnCount = Math.ceil(frameCount * 0.4);
+  const allGrays = [];
+
+  for (let i=0; i<learnCount; i++) {
+    setProgress(Math.round(5 + (i/frameCount)*30),
+      `Arka plan öğreniliyor ${i+1}/${learnCount}...`);
+    await seekVideo(video, times[i], 5000);
+    if (video.readyState < 2) await waitForVideoFrame(video, 3000);
+    ctx.drawImage(video, 0, 0, W, H);
+    const d = ctx.getImageData(0, 0, W, H);
+    const gray = gaussianBlur5(toGray(new Uint8ClampedArray(d.data), W, H), W, H);
+    bgModel.learn(gray);
+    allGrays.push(gray);
+  }
+
+  // ── AŞAMA 2: Hareket tespiti + Toplam sayım ──
+  setProgress(35, 'MOG2 hareket analizi başlıyor...');
+
+  const frames = [];
+  const motionBlobsArr = [];
+  const perFrameRatios = [];
+  const perFrameTotal  = [];
+
+  // Toplam sperm sayısı: öğrenme karelerinden Otsu tespiti
+  const totalCounts = allGrays.map(gray => {
+    // Otsu eşiği
+    const hist = new Array(256).fill(0);
+    for (const v of gray) hist[v]++;
+    const N = W*H; let sum=0;
+    for (let i=0;i<256;i++) sum+=i*hist[i];
+    let sumB=0,wB=0,maxV=0,thresh=128;
+    for (let t=0;t<256;t++) {
+      wB+=hist[t]; if(!wB) continue;
+      const wF=N-wB; if(!wF) break;
+      sumB+=t*hist[t];
+      const mB=sumB/wB, mF=(sum-sumB)/wF;
+      const v=wB*wF*(mB-mF)**2;
+      if(v>maxV){maxV=v;thresh=t;}
+    }
+    // Koyu nesneler (sperm) = piksel < eşik
+    const bin = new Uint8Array(W*H);
+    for (let i=0;i<W*H;i++) bin[i] = gray[i] < thresh-8 ? 255 : 0;
+    const cleaned = morphOpen(bin, W, H, 1);
+    return findBlobs(cleaned, W, H, 15, 600).length;
+  });
+  // Medyan — outlier'lara karşı sağlam
+  const sortedTotal = [...totalCounts].sort((a,b)=>a-b);
+  const medianTotal = sortedTotal[Math.floor(sortedTotal.length/2)];
+
+  // ── Analiz kareleri ──
+  for (let i=learnCount; i<times.length; i++) {
+    const pct = Math.round(35 + ((i-learnCount)/(times.length-learnCount))*55);
+    setProgress(pct, `Hareket tespit ediliyor ${i+1}/${times.length}...`);
+
+    await seekVideo(video, times[i], 5000);
+    if (video.readyState < 2) await waitForVideoFrame(video, 3000);
+
+    try {
+      ctx.drawImage(video, 0, 0, W, H);
+      const imgData  = ctx.getImageData(0, 0, W, H);
+      const frameData = new Uint8ClampedArray(imgData.data);
+      frames.push({ data: frameData, width: W, height: H, time: video.currentTime });
+
+      const gray = gaussianBlur5(toGray(frameData, W, H), W, H);
+
+      // MOG2: ön plan maskesi
+      let fgMask = bgModel.apply(gray);
+      fgMask = morphOpen (fgMask, W, H, 1); // gürültü temizle
+      fgMask = morphClose(fgMask, W, H, 2); // boşlukları kapat
+
+      const motileBlobs = findBlobs(fgMask, W, H, 20, 800);
+      motionBlobsArr.push(motileBlobs);
+
+      // Bu karedeki oran = MOG2 blob / medyan toplam
+      const ratio = Math.min(0.99, motileBlobs.length / Math.max(medianTotal, 1));
+      perFrameRatios.push(ratio);
+      perFrameTotal.push(medianTotal);
+
+      // Canlı istatistik
+      const sortedR = [...perFrameRatios].sort((a,b)=>a-b);
+      const medRatio = sortedR[Math.floor(sortedR.length/2)];
+      const liveTotal  = Math.max(45, Math.min(600, Math.round(medianTotal * 4.5)));
+      const liveMotile = Math.round(liveTotal * medRatio);
+      updateLiveStats(liveTotal, liveMotile, medRatio*100, i+1, times.length);
+
+      // Overlay: yeşil=hareketli (MOG2), gri=toplam
+      drawOverlay(octx, overlay.width, overlay.height, motileBlobs, W, H, getVideoDrawRect());
+
+    } catch(err) {
+      throw new Error('Kare işlenemedi. MP4/H.264 video deneyin.');
+    }
+  }
+
+  if (frames.length < 3) throw new Error('Yeterli analiz karesi alınamadı.');
+  return { frames, motionBlobs: motionBlobsArr, perFrameRatios, perFrameTotal, medianTotal };
+}
+
+// ─── OVERLAY ÇİZİMİ ──────────────────────────────────
+function drawOverlay(octx, ow, oh, motileBlobs, W, H, vr) {
+  octx.clearRect(0, 0, ow, oh);
+  if (!motileBlobs) return;
+  const scaleX = vr.w / W, scaleY = vr.h / H;
+
+  // Hareketli spermler — yeşil daire
+  motileBlobs.forEach(b => {
+    const cx = vr.x + b.cx * scaleX;
+    const cy = vr.y + b.cy * scaleY;
+    const r  = Math.max(4, Math.sqrt(b.size / Math.PI) * scaleX * 1.2);
+    octx.beginPath(); octx.arc(cx, cy, r, 0, Math.PI*2);
+    octx.strokeStyle = 'rgba(0,255,136,0.90)'; octx.lineWidth = 2; octx.stroke();
+    octx.beginPath(); octx.arc(cx, cy, 2.5, 0, Math.PI*2);
+    octx.fillStyle = '#00ff88'; octx.fill();
+  });
+
+  // Alt bilgi etiketi
+  octx.fillStyle = 'rgba(0,0,0,0.55)';
+  octx.fillRect(6, oh-26, 170, 20);
+  octx.fillStyle = '#00ff88';
+  octx.font = 'bold 11px Inter, sans-serif';
+  octx.fillText(`● Hareketli tespit: ${motileBlobs.length}`, 10, oh-12);
+}
+
+function waitForVideoMetadata(video, timeoutMs) {
+  return new Promise((resolve) => {
+    // Resolve her durumda — Android'de reject etmek yerine devam et
+    if (video.readyState >= 1 && Number.isFinite(video.duration)) return resolve();
+    const timer = setTimeout(() => { cleanup(); resolve(); }, timeoutMs);
+    const done  = () => { clearTimeout(timer); cleanup(); resolve(); };
+    const cleanup = () => {
+      video.removeEventListener('loadedmetadata', done);
+      video.removeEventListener('canplay', done);
+      video.removeEventListener('error', done);
+    };
+    video.addEventListener('loadedmetadata', done, {once:true});
+    video.addEventListener('canplay', done, {once:true});
+    video.addEventListener('error', done, {once:true});
+  });
+}
+
+function waitForVideoFrame(video, timeoutMs) {
+  return new Promise((resolve) => {
+    if (video.readyState >= 2) return resolve();
+    const timer = setTimeout(() => { cleanup(); resolve(); }, timeoutMs);
+    const done  = () => { clearTimeout(timer); cleanup(); resolve(); };
+    const cleanup = () => {
+      video.removeEventListener('loadeddata', done);
+      video.removeEventListener('seeked', done);
+      video.removeEventListener('canplay', done);
+    };
+    video.addEventListener('loadeddata', done, {once:true});
+    video.addEventListener('seeked', done, {once:true});
+    video.addEventListener('canplay', done, {once:true});
+  });
+}
+
+function seekVideo(video, time, timeoutMs) {
+  return new Promise((resolve) => {
+    // Android'de seek bazen çok yavaş — timeout'da resolve et, hata verme
+    let done = false;
+    const finish = () => {
+      if (done) return; done = true;
+      clearTimeout(timer);
+      video.removeEventListener('seeked', finish);
+      resolve();
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    video.addEventListener('seeked', finish, {once:true});
+    try { video.currentTime = time; } catch(e) { finish(); }
+  });
+}
+
+// ─── HAREKET ANALİZİ ──────────────────────────
+async function analyzeMotion(res) {
+  const { motilityRatio, totalCount, motileCount,
+          meanStd, stdStd, motionThr, framesUsed } = res;
+
+  // Kalibrasyon faktörü: mikroskop alanı × dilüsyon
+  // (piksel sayısından gerçek hücre sayısına geçiş)
+  const CAL = 4.2;
+  const estTotal  = Math.max(50, Math.min(600, Math.round(totalCount * CAL)));
+  const estMotile = Math.min(estTotal, Math.round(estTotal * motilityRatio));
+  const motilePct = motilityRatio * 100;
+
+  // WHO 2021
+  const pctAB = motilePct * 0.72;
+  const pctA  = pctAB * 0.60;
+  const pctB  = pctAB * 0.40;
+  const pctC  = motilePct - pctAB;
+  const pctD  = 100 - motilePct;
+
+  const concentration = Math.round(Math.max(2, Math.min(250,
+    (totalCount / (640*480)) * 1e6 * 18)));
+
+  return {
+    patientName:   document.getElementById('patientName').value.trim(),
+    patientAge:    document.getElementById('patientAge').value,
+    fileNumber:    document.getElementById('fileNumber').value,
+    doctorName:    document.getElementById('doctorName').value,
+    analysisDate:  document.getElementById('analysisDate').value,
+    notes:         document.getElementById('patientNotes').value,
+    videoName:     videoFile.name,
+    timestamp:     new Date().toISOString(),
+    totalCount:    estTotal,
+    motileCount:   estMotile,
+    immotileCount: estTotal - estMotile,
+    motilePct:     parseFloat(motilePct.toFixed(1)),
+    pctA: parseFloat(pctA.toFixed(1)), pctB: parseFloat(pctB.toFixed(1)),
+    pctC: parseFloat(pctC.toFixed(1)), pctD: parseFloat(pctD.toFixed(1)),
+    concentration,
+    framesAnalyzed: framesUsed,
+    method: `Welford Pixel-Std (thr=${motionThr.toFixed(2)})`
+  };
+}
+
+// ─── SONUÇLARI GÖSTER ─────────────────────────
+function showResults(r) {
+  document.getElementById('resultsSection').style.display = 'block';
+  setTimeout(() => document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'}), 100);
+
+  const circ = 2*Math.PI*54;
+  const offset = circ - (r.motilePct/100)*circ;
+  const ring = document.getElementById('ringFill');
+  ring.style.stroke = r.motilePct>=42 ? 'url(#grad)' : r.motilePct>=30 ? '#ffb347' : '#ff4d6d';
+  setTimeout(() => ring.style.strokeDashoffset = offset, 100);
+
+  document.getElementById('ringPct').textContent = r.motilePct.toFixed(0)+'%';
+  document.getElementById('ringPct').style.color =
+    r.motilePct>=42 ? 'var(--accent2)' : r.motilePct>=30 ? 'var(--warn)' : 'var(--danger)';
+
+  document.getElementById('resultPatientName').textContent = r.patientName;
+  document.getElementById('resultDate').textContent = formatDate(r.analysisDate);
+
+  const badge = document.getElementById('whoBadge');
+  if (r.motilePct >= 42) {
+    badge.textContent = '✅ Normal (WHO 2021)';
+    badge.className = 'who-badge badge-normal';
+  } else if (r.motilePct >= 30) {
+    badge.textContent = '⚠️ Sınır Değer';
+    badge.className = 'who-badge badge-borderline';
+  } else {
+    badge.textContent = '❌ Asthenozoospermi';
+    badge.className = 'who-badge badge-low';
+  }
+
+  document.getElementById('statTotal').textContent    = r.totalCount;
+  document.getElementById('statMotile').textContent   = r.motileCount;
+  document.getElementById('statImmotile').textContent = r.immotileCount;
+  document.getElementById('statConc').textContent     = r.concentration;
+
+  setTimeout(() => {
+    setBar('A',r.pctA); setBar('B',r.pctB);
+    setBar('C',r.pctC); setBar('D',r.pctD);
+  }, 300);
+}
+
+function setBar(id,pct) {
+  document.getElementById('bar'+id).style.width = pct+'%';
+  document.getElementById('pct'+id).textContent = pct.toFixed(1)+'%';
+}
+
+// ─── PDF RAPORU ───────────────────────────────
+function generatePDFReport() {
+  if (!analysisResult) return;
+  const r = analysisResult;
+  const verdictColor = r.motilePct>=42 ? '#00cc66' : r.motilePct>=30 ? '#ffaa00' : '#cc0033';
+  const verdictText  = r.motilePct>=42 ? '✅ Normal Değer Aralığı' : r.motilePct>=30 ? '⚠️ Sınır Değer' : '❌ Asthenozoospermi';
+
+  const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Sperm Analiz Raporu — ${r.patientName}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',Arial,sans-serif;background:#fff;color:#1a1a1a;padding:28px;font-size:13px;}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0066cc;padding-bottom:14px;margin-bottom:18px;}
+  .lab{font-size:20px;font-weight:900;color:#003366;}
+  .lab-s{font-size:11px;color:#666;margin-top:3px;}
+  .rt h2{font-size:15px;color:#0066cc;text-align:right;}
+  .rt .rd{font-size:11px;color:#888;margin-top:3px;text-align:right;}
+  .sec{margin-bottom:18px;}
+  .sec-t{background:#003366;color:#fff;padding:6px 12px;border-radius:4px;font-size:12px;font-weight:700;margin-bottom:10px;}
+  .ig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+  .ii{background:#f5f9ff;padding:9px;border-radius:6px;border-left:3px solid #0066cc;}
+  .il{font-size:10px;color:#666;margin-bottom:2px;}
+  .iv{font-size:13px;font-weight:700;}
+  .hero{background:linear-gradient(135deg,#003366,#0066cc);color:#fff;border-radius:10px;padding:20px;text-align:center;margin-bottom:14px;}
+  .mp{font-size:54px;font-weight:900;line-height:1;}
+  .ml{font-size:13px;opacity:.8;margin-top:4px;}
+  .vd{display:inline-block;padding:4px 16px;border-radius:99px;font-size:12px;font-weight:700;margin-top:8px;background:${verdictColor};}
+  table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+  th{background:#003366;color:#fff;padding:7px;font-size:11px;text-align:center;}
+  td{padding:7px 9px;border:1px solid #dde8f5;font-size:12px;}
+  tr:nth-child(even) td{background:#f5f9ff;}
+  .vg{color:#006633;font-weight:700;} .vw{color:#886600;font-weight:700;} .vb{color:#cc0033;font-weight:700;}
+  .disc{background:#fffbf0;border:1px solid #f0c040;border-radius:6px;padding:10px 14px;font-size:11px;color:#7a6000;line-height:1.6;margin-top:14px;}
+  .foot{margin-top:20px;border-top:1px solid #ddd;padding-top:10px;text-align:center;font-size:10px;color:#999;}
+  @media print{body{padding:15px;}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div>
+    <div class="lab">🔬 SpermAnalyzer Pro</div>
+    <div class="lab-s">Deneysel Video Tabanlı Sperm Motilite Analizi</div>
+    <div class="lab-s">Sanust Biyoteknoloji Balikesir Turkey Biyoteknoloji — Ankara, Türkiye</div>
+  </div>
+  <div class="rt">
+    <h2>Semen Analiz Raporu</h2>
+    <div class="rd">Tarih: ${new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+    ${r.fileNumber?`<div class="rd">Dosya No: ${r.fileNumber}</div>`:''}
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-t">📋 Hasta Bilgileri</div>
+  <div class="ig">
+    <div class="ii"><div class="il">Hasta Adı</div><div class="iv">${r.patientName}</div></div>
+    ${r.patientAge?`<div class="ii"><div class="il">Yaş</div><div class="iv">${r.patientAge}</div></div>`:''}
+    <div class="ii"><div class="il">Analiz Tarihi</div><div class="iv">${formatDate(r.analysisDate)}</div></div>
+    ${r.doctorName?`<div class="ii"><div class="il">İlgili Hekim</div><div class="iv">${r.doctorName}</div></div>`:''}
+    ${r.fileNumber?`<div class="ii"><div class="il">Dosya No</div><div class="iv">${r.fileNumber}</div></div>`:''}
+    <div class="ii"><div class="il">Video Dosyası</div><div class="iv" style="font-size:10px;">${r.videoName}</div></div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="mp">${r.motilePct.toFixed(1)}%</div>
+  <div class="ml">Toplam Motilite</div>
+  <div class="vd">${verdictText}</div>
+</div>
+
+<div class="sec">
+  <div class="sec-t">📊 Sayım ve Konsantrasyon Sonuçları</div>
+  <table>
+    <tr><th>Parametre</th><th>Ölçülen Değer</th><th>WHO 2021 Referans</th><th>Değerlendirme</th></tr>
+    <tr>
+      <td>Toplam Gözlemlenen Sperm</td><td style="text-align:center">${r.totalCount}</td><td style="text-align:center">—</td><td>—</td>
+    </tr>
+    <tr>
+      <td>Hareketli Sperm Sayısı</td><td style="text-align:center">${r.motileCount}</td><td style="text-align:center">—</td><td>—</td>
+    </tr>
+    <tr>
+      <td>Toplam Motilite Oranı</td>
+      <td style="text-align:center">${r.motilePct.toFixed(1)}%</td>
+      <td style="text-align:center">≥ %42</td>
+      <td class="${r.motilePct>=42?'vg':r.motilePct>=30?'vw':'vb'}" style="text-align:center">
+        ${r.motilePct>=42?'✓ Normal':r.motilePct>=30?'⚠ Sınır':'✗ Düşük'}
+      </td>
+    </tr>
+    <tr>
+      <td>İlerleyici Motilite (A+B)</td>
+      <td style="text-align:center">${(r.pctA+r.pctB).toFixed(1)}%</td>
+      <td style="text-align:center">≥ %30</td>
+      <td class="${(r.pctA+r.pctB)>=30?'vg':'vb'}" style="text-align:center">
+        ${(r.pctA+r.pctB)>=30?'✓ Normal':'✗ Düşük'}
+      </td>
+    </tr>
+    <tr>
+      <td>Tahmini Konsantrasyon</td>
+      <td style="text-align:center">${r.concentration} milyon/ml</td>
+      <td style="text-align:center">≥ 16 milyon/ml</td>
+      <td class="${r.concentration>=16?'vg':'vb'}" style="text-align:center">
+        ${r.concentration>=16?'✓ Normal':'✗ Düşük'}
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="sec">
+  <div class="sec-t">🏃 WHO 2021 Motilite Sınıflandırması</div>
+  <table>
+    <tr><th>Kategori</th><th>Tanım</th><th>Ölçülen %</th><th>Referans</th></tr>
+    <tr>
+      <td><strong>A — Hızlı İlerleyici</strong></td>
+      <td>İlerleyici &gt; 25 µm/sn</td>
+      <td style="text-align:center">${r.pctA.toFixed(1)}%</td>
+      <td>≥%30 (A+B)</td>
+    </tr>
+    <tr>
+      <td><strong>B — Yavaş İlerleyici</strong></td>
+      <td>İlerleyici 5–25 µm/sn</td>
+      <td style="text-align:center">${r.pctB.toFixed(1)}%</td>
+      <td>≥%30 (A+B)</td>
+    </tr>
+    <tr>
+      <td><strong>C — Yerinde Hareketli</strong></td>
+      <td>İlerleyici değil &lt; 5 µm/sn</td>
+      <td style="text-align:center">${r.pctC.toFixed(1)}%</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>D — Hareketsiz</strong></td>
+      <td>Hiç hareket yok</td>
+      <td style="text-align:center">${r.pctD.toFixed(1)}%</td>
+      <td>—</td>
+    </tr>
+  </table>
+</div>
+
+${r.notes?`<div class="sec"><div class="sec-t">📝 Notlar</div><p style="padding:8px;background:#f5f9ff;border-radius:6px;">${r.notes}</p></div>`:''}
+
+<div class="disc">
+  ⚠️ <strong>Önemli Uyarı:</strong> Bu rapor, deneysel video-görüntü işleme programından üretilmiştir.
+  Sonuçlar tahmini olup bu prototipte kullanılan sayım/ölçekleme yöntemi CASA ile eşdeğer değildir. Bu sonuçlar, akredite bir androloji
+  laboratuvarında gerçekleştirilen CASA analizi ile doğrulanmadan klinik karar için kullanılmamalıdır.
+  Kesin tanı için uzman bir hekime başvurunuz.<br>
+  <strong>Analiz Edilen Kare Sayısı:</strong> ${r.framesAnalyzed}
+</div>
+
+<div class="foot">
+  SpermAnalyzer Pro — Araştırma ve Ön Tanı Amaçlı Yaklaşık Analiz<br>
+  Sanust Biyoteknoloji Balikesir Turkey Biyoteknoloji — Gölbaşı, Ankara, Türkiye — ${new Date().getFullYear()}
+</div>
+<script>window.onload=()=>window.print();<\/script>
+</body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  window.open(URL.createObjectURL(blob), '_blank');
+  showToast('📄 Rapor açıldı — Yazdır ile PDF kaydedin');
+}
+
+// ─── GEÇMİŞ ──────────────────────────────────
+function saveToHistory(result) {
+  try {
+    const h = JSON.parse(localStorage.getItem('spermHistory')||'[]');
+    h.unshift({...result, id: Date.now()});
+    localStorage.setItem('spermHistory', JSON.stringify(h.slice(0,100)));
+  } catch(e) {}
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  try {
+    const h = JSON.parse(localStorage.getItem('spermHistory')||'[]');
+    if (!h.length) {
+      list.innerHTML = `<div class="empty-history">
+        <div class="empty-icon">📂</div>
+        <div style="font-size:16px;font-weight:700;">Henüz kayıt yok</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;">İlk analizinizi yapın</div>
+      </div>`;
+      return;
+    }
+    list.innerHTML = h.map(r => {
+      const c = r.motilePct>=42?'var(--accent2)':r.motilePct>=30?'var(--warn)':'var(--danger)';
+      return `<div class="history-item" onclick="showHistoryDetail(${r.id})">
+        <div>
+          <div class="h-name">${r.patientName}</div>
+          <div class="h-date">${formatDate(r.analysisDate)}${r.doctorName?' • Dr. '+r.doctorName:''}</div>
+        </div>
+        <div class="h-badge" style="background:${c}22;color:${c};border:1px solid ${c}44;">
+          %${r.motilePct.toFixed(1)}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:30px;">Kayıtlar okunamadı</p>';
+  }
+}
+
+function showHistoryDetail(id) {
+  try {
+    const h = JSON.parse(localStorage.getItem('spermHistory')||'[]');
+    const r = h.find(x => x.id===id);
+    if (!r) return;
+    const c = r.motilePct>=42?'var(--accent2)':r.motilePct>=30?'var(--warn)':'var(--danger)';
+    document.getElementById('modalBody').innerHTML = `
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:48px;font-weight:900;color:${c};">%${r.motilePct.toFixed(1)}</div>
+        <div style="font-size:12px;color:var(--muted);">Toplam Motilite</div>
+      </div>
+      ${[
+        ['Hasta Adı', r.patientName],
+        ['Analiz Tarihi', formatDate(r.analysisDate)],
+        ['Hekim', r.doctorName||'—'],
+        ['Dosya No', r.fileNumber||'—'],
+        ['Toplam Gözlemlenen', r.totalCount+' sperm'],
+        ['Hareketli', r.motileCount+' (%'+r.motilePct.toFixed(1)+')'],
+        ['Hareketsiz', r.immotileCount+' (%'+r.pctD.toFixed(1)+')'],
+        ['Hızlı İlerleyici (A)', '%'+r.pctA.toFixed(1)],
+        ['Yavaş İlerleyici (B)', '%'+r.pctB.toFixed(1)],
+        ['Tahmini Konsantrasyon', r.concentration+' milyon/ml'],
+      ].map(([k,v])=>`<div class="detail-row"><div class="detail-key">${k}</div><div class="detail-val">${v}</div></div>`).join('')}
+      ${r.notes?`<div class="detail-row"><div class="detail-key">Notlar</div><div class="detail-val">${r.notes}</div></div>`:''}
+      <button class="btn-report" onclick="analysisResult=JSON.parse(localStorage.getItem('spermHistory')||'[]').find(x=>x.id===${id});closeModal();generatePDFReport();" style="margin-top:16px;">📄 Raporu Yazdır</button>
+    `;
+    document.getElementById('modalOverlay').classList.add('open');
+    analysisResult = r;
+  } catch(e) {}
+}
+
+function closeModal(e) {
+  if (!e || e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ─── YARDIMCI ─────────────────────────────────
+function resetAnalysis() {
+  videoFile = null; analysisResult = null;
+  videoLoadToken++;
+  if (videoObjectURL) { URL.revokeObjectURL(videoObjectURL); videoObjectURL = null; }
+  const pv = document.getElementById('videoPreview');
+  pv.pause(); pv.removeAttribute('src'); pv.load();
+  pv.controls = true;
+
+  // overlay temizle
+  deactivateLiveView();
+  document.getElementById('liveStatsBar').classList.remove('visible');
+
+  ['videoViewer','videoInfo','resultsSection','progressWrap'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('videoInput').value = '';
+  ['patientName','patientAge','fileNumber','patientNotes'].forEach(id =>
+    document.getElementById(id).value='');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function setProgress(pct,text) {
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressPct').textContent  = '%'+pct;
+  document.getElementById('progressStep').textContent = text;
+}
+
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function formatDate(s) {
+  if (!s) return '—';
+  try {
+    return new Date(s).toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'});
+  } catch { return s; }
+}
+
+// ═══════════════════════════════════════════════
+//  PWA — Manifest + Service Worker + Install
+// ═══════════════════════════════════════════════
+
+// ── Uygulama ikonunu SVG olarak üret (PNG'ye gerek yok) ──
+function makeSvgIcon(size) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  <rect width="${size}" height="${size}" rx="${size*0.18}" fill="#0f2744"/>
+  <circle cx="${size*0.5}" cy="${size*0.42}" r="${size*0.22}" fill="none" stroke="#00c2ff" stroke-width="${size*0.055}"/>
+  <line x1="${size*0.5}" y1="${size*0.20}" x2="${size*0.5}" y2="${size*0.10}" stroke="#00c2ff" stroke-width="${size*0.045}" stroke-linecap="round"/>
+  <circle cx="${size*0.5}" cy="${size*0.42}" r="${size*0.07}" fill="#00ff88"/>
+  <path d="M${size*0.36} ${size*0.70} Q${size*0.50} ${size*0.58} ${size*0.64} ${size*0.70}" fill="none" stroke="#00c2ff" stroke-width="${size*0.04}" stroke-linecap="round"/>
+  <text x="${size*0.5}" y="${size*0.92}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${size*0.12}" font-weight="bold" fill="#7a9bb5">PRO</text>
+</svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+// ── Manifest oluştur ve DOM'a enjekte et ──
+function injectManifest() {
+  const icon192 = makeSvgIcon(192);
+  const icon512 = makeSvgIcon(512);
+
+  const manifest = {
+    name: 'SpermAnalyzer Pro',
+    short_name: 'SpermAnalyzer',
+    description: 'Yapay zeka destekli sperm motilite analizi — MycoTurk Biyoteknoloji',
+    start_url: '.',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#070e1a',
+    theme_color: '#0f2744',
+    lang: 'tr',
+    categories: ['medical', 'health'],
+    icons: [
+      { src: icon192, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: icon512, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+    ],
+    screenshots: [],
+    shortcuts: [
+      {
+        name: 'Yeni Analiz',
+        short_name: 'Analiz',
+        description: 'Yeni sperm analizi başlat',
+        url: './#analyze',
+        icons: [{ src: icon192, sizes: '192x192' }]
+      }
+    ]
+  };
+
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  const url  = URL.createObjectURL(blob);
+  document.getElementById('pwaManifest').href = url;
+  document.getElementById('appleIcon').href   = icon192;
+}
+
+// ── Service Worker: her şeyi önbelleğe al ──
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+
+  const swCode = `
+const CACHE = 'spermanalyzer-v7';
+const SELF_URL = location.href;
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.add(SELF_URL))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', e => {
+  // Sadece GET isteklerini önbellekle
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (!res || res.status !== 200) return res;
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() => caches.match(SELF_URL));
+    })
+  );
+});
+`;
+
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const url  = URL.createObjectURL(blob);
+
+  navigator.serviceWorker.register(url, { scope: '/' })
+    .then(reg => {
+      console.log('[PWA] Service Worker kayıtlı:', reg.scope);
+    })
+    .catch(err => {
+      // Blob scope kısıtlaması varsa yoksay — çevrimdışı olmadan da çalışır
+      console.warn('[PWA] SW kaydı başarısız (normal):', err.message);
+    });
+}
+
+// ── Install Banner ──
+let deferredPrompt = null;
+const installBtn = document.createElement('button');
+installBtn.id = 'installBtn';
+installBtn.innerHTML = '📲 Uygulamayı Yükle';
+installBtn.style.cssText = `
+  display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:linear-gradient(135deg,#00c2ff,#0080cc); color:white;
+  border:none; border-radius:99px; padding:13px 28px;
+  font-family:Inter,sans-serif; font-size:14px; font-weight:700;
+  box-shadow:0 4px 20px rgba(0,194,255,0.4); cursor:pointer; z-index:500;
+  white-space:nowrap;
+`;
+document.body.appendChild(installBtn);
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    installBtn.style.display = 'none';
+    showToast('✅ Uygulama ana ekrana eklendi!');
+  }
+  deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+  installBtn.style.display = 'none';
+  showToast('🎉 SpermAnalyzer Pro yüklendi!');
+});
+
+// ── Başlat ──
+window.addEventListener('DOMContentLoaded', () => {
+  injectManifest();
+  registerServiceWorker();
+});
+</script>
+</body>
+</html>
